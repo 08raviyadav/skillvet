@@ -1,0 +1,33 @@
+name: "SkillVet"
+description: "Security-scan AI agent skills, MCP configs, and instruction files before installing them."
+author: "Ravi Yadav"
+branding:
+  icon: "shield"
+  color: "green"
+
+inputs:
+  path:
+    description: "Skill file or folder to scan"
+    required: true
+    default: "."
+  fail-under:
+    description: "Fail the job if the score falls below this (0-100)"
+    required: false
+    default: "60"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Run SkillVet
+      shell: bash
+      run: |
+        python3 "${{ github.action_path }}/skillvet.py" \
+          "${{ inputs.path }}" \
+          --fail-under "${{ inputs.fail-under }}" \
+          --json skillvet-report.json
+    - name: Upload report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: skillvet-report
+        path: skillvet-report.json
